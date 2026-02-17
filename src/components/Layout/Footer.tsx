@@ -12,14 +12,14 @@ const Footer = () => {
             <Link to="/" className="flex items-center mb-4">
               <img 
                 src="/logo.svg" 
-                alt="EuroGameTracker" 
+                alt="Colexalia" 
                 className="h-8 w-8 mr-2"
                 onError={(e) => {
                   // Fallback si el logo no está disponible
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <span className="text-xl font-bold">EuroGameTracker</span>
+              <span className="text-xl font-bold">Colexalia</span>
             </Link>
             <p className="text-gray-400 mb-4">
               Seguimiento de precios de videojuegos europeos.
@@ -102,10 +102,10 @@ const Footer = () => {
 
         <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-500 text-sm">
           <p>
-            © {currentYear} EuroGameTracker. Todos los derechos reservados.
+            © {currentYear} Colexalia. Todos los derechos reservados.
           </p>
           <p className="mt-2">
-            EuroGameTracker no está afiliado oficialmente con ningún fabricante de consolas.
+            Colexalia no está afiliado oficialmente con ningún fabricante de consolas.
             Todos los precios son obtenidos a través de la API de PriceCharting.
           </p>
         </div>

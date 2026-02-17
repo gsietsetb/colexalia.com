@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { AuthProvider } from './contexts/AuthContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CollectionProvider } from './contexts/CollectionContext';
@@ -28,6 +30,8 @@ function App() {
           <CollectionProvider>
             <Layout>
               <Suspense fallback={<LoadingSpinner />}>
+                <Analytics />
+                <SpeedInsights />
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />

@@ -37,6 +37,11 @@ interface PriceChartingResponse {
  */
 export async function searchProducts(query: string, filters: ProductSearchFilters = {}) {
   try {
+    // Para simular datos, ya que no tenemos API real en el desarrollo
+    if (!API_TOKEN) {
+      return simulateSearchResults(query, filters);
+    }
+
     const params: Record<string, string | number> = {
       t: API_TOKEN,
       q: query
@@ -78,6 +83,11 @@ export async function searchProducts(query: string, filters: ProductSearchFilter
  */
 export async function getProduct(id: string) {
   try {
+    // Para simular datos, ya que no tenemos API real en el desarrollo
+    if (!API_TOKEN) {
+      return simulateProductDetail(id);
+    }
+
     const response = await axios.get<PriceChartingResponse>(`${BASE_URL}/product`, {
       params: {
         t: API_TOKEN,
@@ -127,9 +137,12 @@ export async function getProductsBatch(ids: string[]) {
  * Nota: Esta función es simulada ya que no está claro si la API de PriceCharting proporciona
  * datos históricos. En un entorno real, deberías sustituir esto por la API real o implementar
  * tu propio seguimiento de precios.
+ * 
+ * @param id - El ID del producto (no se utiliza en esta implementación simulada, pero se incluye para compatibilidad futura)
+ * @param months - Número de meses para los que generar datos históricos
  */
-export async function getPriceHistory(id: string, months = 12) {
-  // Simulamos datos para el gráfico
+export async function getPriceHistory(_id: string, months = 12) {
+  // Simulamos datos para el gráfico - en una implementación real, el id se utilizaría para obtener datos específicos del producto
   const today = new Date();
   const data = [];
 
@@ -159,6 +172,75 @@ export async function getPriceHistory(id: string, months = 12) {
 export function getEbayAffiliateUrl(productName: string, platformName: string, affiliateId: string) {
   const searchTerm = encodeURIComponent(`${productName} ${platformName}`);
   return `https://www.ebay.com/sch/i.html?_nkw=${searchTerm}&_sacat=0&campid=${affiliateId}`;
+}
+
+/**
+ * Función para simular resultados de búsqueda cuando no hay API_TOKEN disponible
+ */
+function simulateSearchResults(query: string, filters: ProductSearchFilters = {}) {
+  // Generar datos de ejemplo para desarrollo
+  const results = [];
+  const platforms = ['Nintendo Switch', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Nintendo 3DS'];
+  const genres = ['RPG', 'Action', 'Adventure', 'Sports', 'Racing'];
+  
+  // Crear entre 5 y 20 resultados aleatorios
+  const numResults = Math.floor(Math.random() * 15) + 5;
+  
+  for (let i = 0; i < numResults; i++) {
+    const platform = platforms[Math.floor(Math.random() * platforms.length)];
+    const genre = genres[Math.floor(Math.random() * genres.length)];
+    const priceLoose = Math.round((15 + Math.random() * 45) * 100) / 100;
+    const priceCIB = Math.round((priceLoose * 1.4 + Math.random() * 10) * 100) / 100;
+    const priceNew = Math.round((priceCIB * 1.3 + Math.random() * 15) * 100) / 100;
+    
+    // Si hay filtros, verificamos que los datos generados coincidan
+    if (filters.platform && platform !== filters.platform) continue;
+    if (filters.genre && genre !== filters.genre) continue;
+    if (filters.priceMin && priceLoose < filters.priceMin) continue;
+    if (filters.priceMax && priceLoose > filters.priceMax) continue;
+    
+    results.push({
+      id: `sim-${i}-${Date.now()}`,
+      name: `${query} Game ${i + 1}`,
+      platform,
+      imageUrl: `https://via.placeholder.com/300x300.png?text=${encodeURIComponent(query + ' ' + (i + 1))}`,
+      priceLoose,
+      priceCIB,
+      priceNew,
+      releaseDate: `202${Math.floor(Math.random() * 4)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-01`,
+      genre
+    });
+  }
+  
+  return results;
+}
+
+/**
+ * Función para simular detalles de un producto cuando no hay API_TOKEN disponible
+ */
+function simulateProductDetail(id: string) {
+  const platforms = ['Nintendo Switch', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Nintendo 3DS'];
+  const genres = ['RPG', 'Action', 'Adventure', 'Sports', 'Racing'];
+  
+  const platform = platforms[Math.floor(Math.random() * platforms.length)];
+  const genre = genres[Math.floor(Math.random() * genres.length)];
+  const priceLoose = Math.round((15 + Math.random() * 45) * 100) / 100;
+  const priceCIB = Math.round((priceLoose * 1.4 + Math.random() * 10) * 100) / 100;
+  const priceNew = Math.round((priceCIB * 1.3 + Math.random() * 15) * 100) / 100;
+  
+  return {
+    id,
+    name: `Game Details for ID: ${id.substring(0, 8)}`,
+    platform,
+    imageUrl: `https://via.placeholder.com/500x500.png?text=${encodeURIComponent('Game ' + id.substring(0, 6))}`,
+    priceLoose,
+    priceCIB,
+    priceNew,
+    releaseDate: `202${Math.floor(Math.random() * 4)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-01`,
+    genre,
+    upc: `123456789${Math.floor(Math.random() * 1000)}`,
+    asin: `B0${Math.floor(Math.random() * 10000000)}`
+  };
 }
 
 export default {

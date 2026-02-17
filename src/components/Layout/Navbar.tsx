@@ -1,164 +1,205 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Bars3Icon, XMarkIcon, UserCircleIcon } from '@heroicons/react/24/outline';
-import SearchBar from '../Search/SearchBar';
+import { 
+  Bars3Icon, 
+  XMarkIcon,
+  UserIcon,
+  HeartIcon,
+  CollectionIcon,
+  SearchIcon,
+  HomeIcon,
+  ChartBarIcon
+} from '@heroicons/react/24/outline';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { currentUser, logOut } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      navigate('/');
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  };
+  // Detectar scroll para aplicar glassmorphism
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // Cerrar menú móvil al cambiar de ruta
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   return (
-    <nav className="bg-primary-700 text-white shadow-md">
+    <nav 
+      className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+        scrolled ? 'glass-dark py-2 shadow-lg' : 'bg-transparent py-4'
+      }`}
+    >
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center font-bold text-xl">
-            <img 
-              src="/logo.svg" 
-              alt="Europa Game Price Tracker" 
-              className="h-8 w-8 mr-2"
-              onError={(e) => {
-                // Fallback si el logo no está disponible
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <span>EuroGameTracker</span>
+          <Link to="/" className="flex items-center">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-secondary-600 flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg">C</span>
+              </div>
+              <span className="font-extrabold text-xl gradient-text">
+                COLEXALIA
+              </span>
+            </div>
           </Link>
 
-          {/* Búsqueda en pantallas medianas y grandes */}
-          <div className="hidden md:block md:w-1/3">
-            <SearchBar />
-          </div>
-
-          {/* Menú de navegación en pantallas medianas y grandes */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link to="/search" className="hover:text-primary-200">
-              Explorar
-            </Link>
+          {/* Navegación desktop */}
+          <div className="hidden md:flex items-center space-x-6">
+            <NavLink to="/" className={({isActive}) => 
+              `text-sm font-medium ${isActive ? 'text-primary-500' : 'text-gray-600 hover:text-primary-600'} transition-colors`
+            }>
+              <span className="flex items-center"><HomeIcon className="w-4 h-4 mr-1" /> Inicio</span>
+            </NavLink>
+            <NavLink to="/search" className={({isActive}) => 
+              `text-sm font-medium ${isActive ? 'text-primary-500' : 'text-gray-600 hover:text-primary-600'} transition-colors`
+            }>
+              <span className="flex items-center"><SearchIcon className="w-4 h-4 mr-1" /> Explorar</span>
+            </NavLink>
+            <NavLink to="/premium" className={({isActive}) => 
+              `text-sm font-medium ${isActive ? 'text-accent-500' : 'text-gray-600 hover:text-accent-600'} transition-colors`
+            }>
+              <span className="flex items-center"><ChartBarIcon className="w-4 h-4 mr-1" /> Premium</span>
+            </NavLink>
+            
             {currentUser ? (
-              <>
-                <Link to="/dashboard" className="hover:text-primary-200">
-                  Dashboard
-                </Link>
-                <Link to="/wishlist" className="hover:text-primary-200">
-                  Wishlist
-                </Link>
-                <Link to="/collection" className="hover:text-primary-200">
-                  Colección
-                </Link>
-                <div className="relative group">
-                  <button className="flex items-center hover:text-primary-200">
-                    <UserCircleIcon className="h-6 w-6 mr-1" />
-                    <span>Perfil</span>
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
-                    <Link 
-                      to="/settings" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
+              <div className="relative group">
+                <div className="flex items-center space-x-1 cursor-pointer">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <UserIcon className="w-5 h-5 text-gray-700" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">Mi cuenta</span>
+                </div>
+                
+                <div className="absolute right-0 mt-2 w-48 glass-dark border border-gray-700 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top-right">
+                  <div className="py-1 px-2">
+                    <Link to="/dashboard" className="block px-4 py-2 text-sm text-gray-200 rounded-lg hover:bg-gray-700 transition-colors">
+                      Dashboard
+                    </Link>
+                    <Link to="/wishlist" className="block px-4 py-2 text-sm text-gray-200 rounded-lg hover:bg-gray-700 transition-colors">
+                      <span className="flex items-center"><HeartIcon className="w-4 h-4 mr-1" /> Mi Wishlist</span>
+                    </Link>
+                    <Link to="/collection" className="block px-4 py-2 text-sm text-gray-200 rounded-lg hover:bg-gray-700 transition-colors">
+                      <span className="flex items-center"><CollectionIcon className="w-4 h-4 mr-1" /> Mi Colección</span>
+                    </Link>
+                    <Link to="/settings" className="block px-4 py-2 text-sm text-gray-200 rounded-lg hover:bg-gray-700 transition-colors">
                       Configuración
                     </Link>
-                    <Link 
-                      to="/premium" 
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Premium
-                    </Link>
+                    <hr className="my-1 border-gray-600" />
                     <button 
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      onClick={logOut}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-200 rounded-lg hover:bg-gray-700 transition-colors"
                     >
                       Cerrar sesión
                     </button>
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
-              <>
-                <Link to="/login" className="hover:text-primary-200">
+              <div className="flex items-center space-x-2">
+                <Link to="/auth/login" className="px-4 py-1.5 text-sm font-medium text-primary-600 hover:text-primary-800 transition-colors">
                   Iniciar sesión
                 </Link>
-                <Link to="/signup" className="bg-white text-primary-700 px-4 py-2 rounded-md font-medium hover:bg-primary-50">
+                <Link to="/auth/signup" className="px-4 py-1.5 text-sm font-medium bg-primary-600 text-white rounded-full hover:bg-primary-700 transition-colors">
                   Registrarse
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
-          {/* Botón de menú móvil */}
-          <div className="md:hidden flex items-center">
-            <button
-              className="text-white focus:outline-none"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
+          {/* Botón menú móvil */}
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            {isMenuOpen ? (
+              <XMarkIcon className="h-6 w-6" />
+            ) : (
+              <Bars3Icon className="h-6 w-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Menú móvil */}
+        {isMenuOpen && (
+          <div className="md:hidden mt-4 py-4 glass rounded-xl">
+            <div className="flex flex-col space-y-2 px-4">
+              <NavLink to="/" className={({isActive}) => 
+                `px-3 py-2 rounded-lg ${isActive ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+              }>
+                <span className="flex items-center"><HomeIcon className="w-5 h-5 mr-2" /> Inicio</span>
+              </NavLink>
+              <NavLink to="/search" className={({isActive}) => 
+                `px-3 py-2 rounded-lg ${isActive ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+              }>
+                <span className="flex items-center"><SearchIcon className="w-5 h-5 mr-2" /> Explorar</span>
+              </NavLink>
+              <NavLink to="/premium" className={({isActive}) => 
+                `px-3 py-2 rounded-lg ${isActive ? 'bg-accent-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+              }>
+                <span className="flex items-center"><ChartBarIcon className="w-5 h-5 mr-2" /> Premium</span>
+              </NavLink>
+              
+              {currentUser ? (
+                <>
+                  <hr className="border-gray-200 my-2" />
+                  <NavLink to="/dashboard" className={({isActive}) => 
+                    `px-3 py-2 rounded-lg ${isActive ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+                  }>
+                    <span className="flex items-center"><UserIcon className="w-5 h-5 mr-2" /> Dashboard</span>
+                  </NavLink>
+                  <NavLink to="/wishlist" className={({isActive}) => 
+                    `px-3 py-2 rounded-lg ${isActive ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+                  }>
+                    <span className="flex items-center"><HeartIcon className="w-5 h-5 mr-2" /> Mi Wishlist</span>
+                  </NavLink>
+                  <NavLink to="/collection" className={({isActive}) => 
+                    `px-3 py-2 rounded-lg ${isActive ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+                  }>
+                    <span className="flex items-center"><CollectionIcon className="w-5 h-5 mr-2" /> Mi Colección</span>
+                  </NavLink>
+                  <NavLink to="/settings" className={({isActive}) => 
+                    `px-3 py-2 rounded-lg ${isActive ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'}`
+                  }>
+                    Configuración
+                  </NavLink>
+                  <button 
+                    onClick={logOut}
+                    className="px-3 py-2 text-left rounded-lg text-gray-800 hover:bg-gray-100"
+                  >
+                    Cerrar sesión
+                  </button>
+                </>
               ) : (
-                <Bars3Icon className="h-6 w-6" />
+                <>
+                  <hr className="border-gray-200 my-2" />
+                  <Link to="/auth/login" className="px-3 py-2 rounded-lg text-gray-800 hover:bg-gray-100">
+                    Iniciar sesión
+                  </Link>
+                  <Link to="/auth/signup" className="px-3 py-2 rounded-lg bg-primary-600 text-white">
+                    Registrarse
+                  </Link>
+                </>
               )}
-            </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Menú móvil */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-primary-800 px-4 py-3">
-          <div className="mb-3">
-            <SearchBar />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <Link to="/search" className="hover:text-primary-200 py-2">
-              Explorar
-            </Link>
-            {currentUser ? (
-              <>
-                <Link to="/dashboard" className="hover:text-primary-200 py-2">
-                  Dashboard
-                </Link>
-                <Link to="/wishlist" className="hover:text-primary-200 py-2">
-                  Wishlist
-                </Link>
-                <Link to="/collection" className="hover:text-primary-200 py-2">
-                  Colección
-                </Link>
-                <Link to="/settings" className="hover:text-primary-200 py-2">
-                  Configuración
-                </Link>
-                <Link to="/premium" className="hover:text-primary-200 py-2">
-                  Premium
-                </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="text-left hover:text-primary-200 py-2"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="hover:text-primary-200 py-2">
-                  Iniciar sesión
-                </Link>
-                <Link to="/signup" className="bg-white text-primary-700 px-4 py-2 rounded-md font-medium hover:bg-primary-50 text-center">
-                  Registrarse
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
